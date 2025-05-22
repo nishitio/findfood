@@ -13,7 +13,7 @@ interface FoodItem {
   name: string;
   calories: number;
   timestamp: string;
-  quantity: number; // Add quantity to the interface
+  quantity: number;
 }
 
 const Dashboard = () => {
@@ -32,7 +32,7 @@ const Dashboard = () => {
 
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
 
-  const [quantity, setQuantity] = useState<number>(1); // New state for quantity
+  const [quantity, setQuantity] = useState<number>(1);
 
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [isTodaysFoodHistoryExpanded, setIsTodaysFoodHistoryExpanded] = useState(true);
@@ -75,7 +75,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchCalorieData();
-    fetchCalorieDataForDate(selectedDate); // Fetch yesterday's data on component mount
+    fetchCalorieDataForDate(selectedDate);
   }, []);
 
   const fetchCalorieData = async () => {
@@ -88,7 +88,7 @@ const Dashboard = () => {
       const data = await response.json();
       if (response.ok) {
         setCalorieIntake(data.calories);
-        setCalorieGoal(data.goal); // Ensure the goal is set from the backend
+        setCalorieGoal(data.goal);
         setFoodItems(data.foodItems);
       } else {
         console.error('Failed to fetch calorie data:', data.error);
@@ -138,8 +138,8 @@ const Dashboard = () => {
           setNotification(`Great job! You've added ${result.dish} (${totalCalories} calories) to your food diary.`);
           setTimeout(() => setNotification(null), 5000);
           await fetchCalorieData();
-          setQuantity(1); // Reset quantity to default value
-          setImage(null); // Clear the image 
+          setQuantity(1);
+          setImage(null);
         } else {
           console.error('Failed to add calories');
           setNotification('Oops! We couldn\'t add your food. Please try again.');
@@ -159,7 +159,7 @@ const Dashboard = () => {
   };
 
   const handleEditGoalClick = () => {
-    setNewGoal(calorieGoal); // Update newGoal with the current calorieGoal
+    setNewGoal(calorieGoal);
     setEditGoal(true);
   };
 
@@ -179,7 +179,7 @@ const Dashboard = () => {
       });
 
       if (response.ok) {
-        setCalorieGoal(newGoal); // Update the state with the new goal
+        setCalorieGoal(newGoal);
         setEditGoal(false);
         setNotification('Calorie goal updated successfully');
         setTimeout(() => setNotification(null), 3000);
@@ -208,7 +208,6 @@ const Dashboard = () => {
         const data = await response.json();
         setNotification(`${foodName} (${data.removedCalories} calories) has been removed from your food diary.`);
         setTimeout(() => setNotification(null), 5000);
-        // Refresh the calorie data after deleting an item
         await fetchCalorieData();
       } else {
         const errorData = await response.json();
@@ -271,327 +270,275 @@ const Dashboard = () => {
     }
   };
 
-  const foodHistoryVariants = {
-    open: { 
-      opacity: 1, 
-      height: 'auto',
-      transition: { 
-        duration: 0.3, 
-        ease: [0.04, 0.62, 0.23, 0.98] 
-      } 
-    },
-    closed: { 
-      opacity: 0, 
-      height: 0,
-      transition: { 
-        duration: 0.3, 
-        ease: [0.04, 0.62, 0.23, 0.98] 
-      } 
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100 py-8 flex flex-col">
-      <div className="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-lg">
-          <h1 className="text-3xl font-bold text-indigo-700">Calorie Tracker</h1>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <header className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 bg-white p-6 rounded-2xl shadow-lg backdrop-blur-lg bg-opacity-90">
+          <div className="flex items-center">
+            <Utensils className="h-8 w-8 text-indigo-600 mr-3" />
+            <h1 className="text-3xl font-bold text-indigo-700">Calorie Tracker</h1>
+          </div>
           <button
             onClick={handleLogout}
-            className="bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50 flex items-center transition-all duration-300 ease-in-out"
+            className="w-full sm:w-auto bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2.5 px-6 rounded-full focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50 flex items-center justify-center transition-all duration-300 ease-in-out"
           >
             <LogOut className="mr-2" size={20} />
             Logout
           </button>
         </header>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8 bg-white p-6 rounded-xl shadow-lg"
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-indigo-600">Daily Progress</h2>
-            {editGoal ? (
-              <div className="flex items-center">
-                <input
-                  type="number"
-                  value={newGoal}
-                  onChange={handleGoalChange}
-                  className="border rounded-l px-3 py-2 w-24 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                />
-                <button
-                  onClick={handleGoalSubmit}
-                  className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-r transition-colors duration-300"
-                >
-                  Save
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={handleEditGoalClick}
-                className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold py-2 px-4 rounded-full flex items-center transition-colors duration-300"
-              >
-                <Edit className="mr-2" size={16} />
-                Edit Goal
-              </button>
-            )}
-          </div>
-          <CalorieProgress intake={calorieIntake} goal={calorieGoal} />
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mb-8 bg-white p-6 rounded-xl shadow-lg"
-        >
-          <h2 className="text-2xl font-semibold text-indigo-600 mb-4">Add Food</h2>
-          <ImageUploader onImageUpload={handleImageUpload} />
-
-          {loading && (
-            <div className="mt-6 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
-              <p className="mt-2 text-indigo-600">Analyzing your dish...</p>
-            </div>
-          )}
-          {error && (
-            <div className="mt-6 text-center text-red-600">
-              <p>{error}</p>
-            </div>
-          )}
-          {result && image && (
-            <div className="mt-6">
-              <ResultDisplay result={result} image={image} />
-              <div className="mt-4">
-                <label className="block text-gray-700 text-sm font-semibold mb-2">
-                  Enter the amount you have eaten
-                </label>
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(parseFloat(e.target.value))}
-                  className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                  min="0.1"
-                  step="0.1"
-                  placeholder="e.g., 1.5 for one and a half servings"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Please specify the number of servings you consumed. For example, enter 1.5 for one and a half servings.
-                </p>
-              </div>
-              <button
-                onClick={handleEatenClick}
-                className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-colors duration-300"
-              >
-                <Utensils className="mr-2" size={20} />
-                I've Eaten This
-              </button>
-            </div>
-          )}
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-8 bg-white p-6 rounded-xl shadow-lg"
-        >
-          <div 
-            className="flex justify-between items-center mb-4 cursor-pointer" 
-            onClick={toggleTodaysFoodHistoryExpansion}
-          >
-            <h2 className="text-2xl font-semibold text-indigo-600">Today's Food History</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 space-y-6">
             <motion.div
-              animate={{ rotate: isTodaysFoodHistoryExpanded ? 180 : 0 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-white p-6 rounded-2xl shadow-lg backdrop-blur-lg bg-opacity-90"
             >
-              <ChevronDown size={24} className="text-indigo-500" />
-            </motion.div>
-          </div>
-          <AnimatePresence>
-            {isTodaysFoodHistoryExpanded && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {foodItems.length > 0 ? (
-                  <ul className="divide-y divide-gray-200">
-                    {foodItems.map((item) => (
-                      <li key={item._id} className="py-4">
-                        <div 
-                          className="flex justify-between items-center cursor-pointer"
-                          onClick={() => toggleItemExpansion(item._id)}
-                        >
-                          <div className="flex items-center">
-                            <span className="text-gray-800 font-medium">{item.name}</span>
-                            <span className="ml-2 text-sm text-gray-500">({item.calories} calories)</span>
-                          </div>
-                          <div className="flex items-center">
-                            {expandedItems.has(item._id) ? (
-                              <ChevronUp size={20} className="text-indigo-500" />
-                            ) : (
-                              <ChevronDown size={20} className="text-indigo-500" />
-                            )}
-                          </div>
-                        </div>
-                        {expandedItems.has(item._id) && (
-                          <div className="mt-2 pl-4">
-                            <div className="text-sm text-gray-600 flex items-center">
-                              <Clock size={14} className="mr-1" />
-                              {formatTime(item.timestamp)}
-                            </div>
-                            <div className="text-sm text-gray-600 mt-1">
-                              Amount: {item.quantity} {item.quantity === 1 ? 'serving' : 'servings'}
-                            </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteFoodItem(item._id, item.calories, item.name);
-                              }}
-                              className="mt-2 text-red-500 hover:text-red-700 transition-colors text-sm flex items-center"
-                            >
-                              <Trash2 size={14} className="mr-1" />
-                              Remove
-                            </button>
-                          </div>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-600">No food items recorded today.</p>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mb-8 bg-white p-6 rounded-xl shadow-lg overflow-hidden"
-        >
-          <div 
-            className="flex justify-between items-center mb-4 cursor-pointer" 
-            onClick={togglePastFoodHistoryExpansion}
-          >
-            <h2 className="text-2xl font-semibold text-indigo-600">Food History</h2>
-            <motion.div
-              animate={{ rotate: isPastFoodHistoryExpanded ? 180 : 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <ChevronDown size={24} className="text-indigo-500" />
-            </motion.div>
-          </div>
-          <AnimatePresence initial={false}>
-            {isPastFoodHistoryExpanded && (
-              <motion.div
-                variants={foodHistoryVariants}
-                initial="closed"
-                animate="open"
-                exit="closed"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <CalorieCalendar onDateSelect={handleDateSelect} selectedDate={selectedDate} />
-                  <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h2 className="text-2xl font-semibold text-indigo-600">Daily Progress</h2>
+                {editGoal ? (
+                  <div className="flex items-center w-full sm:w-auto">
+                    <input
+                      type="number"
+                      value={newGoal}
+                      onChange={handleGoalChange}
+                      className="w-full sm:w-24 border rounded-l px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                    />
                     <button
-                      onClick={() => navigateDate('prev')}
-                      className="p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50"
+                      onClick={handleGoalSubmit}
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-r transition-colors duration-300"
                     >
-                      <ChevronLeft size={20} />
-                    </button>
-                    <button
-                      onClick={() => navigateDate('next')}
-                      className="p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50"
-                    >
-                      <ChevronRight size={20} />
+                      Save
                     </button>
                   </div>
-                </div>
-                {historicalDate && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="mt-4 bg-indigo-50 p-6 rounded-xl"
+                ) : (
+                  <button
+                    onClick={handleEditGoalClick}
+                    className="w-full sm:w-auto bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold py-2.5 px-6 rounded-full flex items-center justify-center transition-colors duration-300"
                   >
-                    <h3 className="text-xl font-semibold text-indigo-800 mb-3">
-                      {formatDate(historicalDate)}
-                    </h3>
-                    <div className="flex items-center justify-between mb-4">
-                      <p className="text-indigo-600 font-medium">Total calories: {historicalCalorieIntake}</p>
-                      <p className="text-indigo-600 font-medium">Goal: {calorieGoal} calories</p>
-                    </div>
-                    <div className="w-full bg-indigo-200 rounded-full h-3 mb-6">
-                      <div 
-                        className="bg-indigo-600 h-3 rounded-full transition-all duration-500 ease-out" 
-                        style={{ width: `${Math.min((historicalCalorieIntake / calorieGoal) * 100, 100)}%` }}
-                      ></div>
-                    </div>
-                    {historicalFoodItems.length > 0 ? (
-                      <ul className="divide-y divide-indigo-200">
-                        {historicalFoodItems.map((item) => (
-                          <li key={item._id} className="py-3 flex justify-between items-center">
-                            <div>
-                              <span className="text-gray-800 font-medium">{item.name}</span>
-                              <span className="ml-2 text-sm text-gray-500">
-                                ({item.quantity} {item.quantity === 1 ? 'serving' : 'servings'})
-                              </span>
+                    <Edit className="mr-2" size={16} />
+                    Edit Goal
+                  </button>
+                )}
+              </div>
+              <CalorieProgress intake={calorieIntake} goal={calorieGoal} />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="bg-white p-6 rounded-2xl shadow-lg backdrop-blur-lg bg-opacity-90"
+            >
+              <h2 className="text-2xl font-semibold text-indigo-600 mb-6">Add Food</h2>
+              <ImageUploader onImageUpload={handleImageUpload} />
+
+              {loading && (
+                <div className="mt-8 flex flex-col items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+                  <p className="mt-4 text-indigo-600">Analyzing your dish...</p>
+                </div>
+              )}
+
+              {error && (
+                <div className="mt-6 p-4 bg-red-50 rounded-lg text-red-600 text-center">
+                  <p>{error}</p>
+                </div>
+              )}
+
+              {result && image && (
+                <div className="mt-8">
+                  <ResultDisplay result={result} image={image} />
+                  <div className="mt-6 bg-gray-50 p-6 rounded-xl">
+                    <label className="block text-gray-700 text-sm font-semibold mb-2">
+                      Serving Size
+                    </label>
+                    <input
+                      type="number"
+                      value={quantity}
+                      onChange={(e) => setQuantity(parseFloat(e.target.value))}
+                      className="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                      min="0.1"
+                      step="0.1"
+                      placeholder="Enter number of servings"
+                    />
+                    <p className="mt-2 text-sm text-gray-500">
+                      Specify the number of servings (e.g., 1.5 for one and a half servings)
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleEatenClick}
+                    className="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 px-6 rounded-xl flex items-center justify-center transition-colors duration-300"
+                  >
+                    <Utensils className="mr-2" size={20} />
+                    I've Eaten This
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </div>
+
+          <div className="lg:col-span-4 space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-white p-6 rounded-2xl shadow-lg backdrop-blur-lg bg-opacity-90"
+            >
+              <div 
+                className="flex justify-between items-center cursor-pointer" 
+                onClick={toggleTodaysFoodHistoryExpansion}
+              >
+                <h2 className="text-2xl font-semibold text-indigo-600">Today's Food</h2>
+                <motion.div
+                  animate={{ rotate: isTodaysFoodHistoryExpanded ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ChevronDown size={24} className="text-indigo-500" />
+                </motion.div>
+              </div>
+
+              <AnimatePresence>
+                {isTodaysFoodHistoryExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-4"
+                  >
+                    {foodItems.length > 0 ? (
+                      <ul className="divide-y divide-gray-100">
+                        {foodItems.map((item) => (
+                          <li key={item._id} className="py-4">
+                            <div 
+                              className="flex justify-between items-center cursor-pointer"
+                              onClick={() => toggleItemExpansion(item._id)}
+                            >
+                              <div>
+                                <span className="font-medium text-gray-900">{item.name}</span>
+                                <span className="ml-2 text-sm text-gray-500">({item.calories} cal)</span>
+                              </div>
+                              <motion.div
+                                animate={{ rotate: expandedItems.has(item._id) ? 180 : 0 }}
+                                transition={{ duration: 0.3 }}
+                              >
+                                <ChevronDown size={20} className="text-gray-400" />
+                              </motion.div>
                             </div>
-                            <div className="flex items-center">
-                              <span className="text-indigo-600 font-medium mr-2">{item.calories} cal</span>
-                              <Clock size={14} className="text-gray-400" />
-                              <span className="text-sm text-gray-500 ml-1">{formatTime(item.timestamp)}</span>
-                            </div>
+
+                            {expandedItems.has(item._id) && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="mt-2 pl-4 space-y-2"
+                              >
+                                <div className="flex items-center text-sm text-gray-600">
+                                  <Clock size={14} className="mr-1.5" />
+                                  {formatTime(item.timestamp)}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  {item.quantity} {item.quantity === 1 ? 'serving' : 'servings'}
+                                </div>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteFoodItem(item._id, item.calories, item.name);
+                                  }}
+                                  className="text-red-500 hover:text-red-700 transition-colors text-sm flex items-center"
+                                >
+                                  <Trash2 size={14} className="mr-1.5" />
+                                  Remove
+                                </button>
+                              </motion.div>
+                            )}
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-gray-600 text-center py-4">No food items recorded for this date.</p>
+                      <p className="text-gray-500 text-center py-4">No food items recorded today</p>
                     )}
                   </motion.div>
                 )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </div>
+              </AnimatePresence>
+            </motion.div>
 
-      <motion.footer
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="mt-12 mx-4 sm:mx-6 lg:mx-8"
-      >
-        <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="px-6 py-8">
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <div className="text-center md:text-left mb-4 md:mb-0">
-                <h3 className="text-lg font-semibold text-indigo-600">Calorie Tracker</h3>
-                <p className="text-sm text-gray-600">Stay healthy, stay fit!</p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-white p-6 rounded-2xl shadow-lg backdrop-blur-lg bg-opacity-90"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-indigo-600">History</h2>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => navigateDate('prev')}
+                    className="p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button
+                    onClick={() => navigateDate('next')}
+                    className="p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
               </div>
-              <div className="flex flex-wrap justify-center md:justify-end space-x-4">
-                <a href="#" className="text-indigo-600 hover:text-indigo-800 transition-colors duration-300 mb-2 md:mb-0">
-                  Privacy Policy
-                </a>
-                <a href="#" className="text-indigo-600 hover:text-indigo-800 transition-colors duration-300 mb-2 md:mb-0">
-                  Terms of Service
-                </a>
-                <a href="#" className="text-indigo-600 hover:text-indigo-800 transition-colors duration-300">
-                  Contact Us
-                </a>
-              </div>
-            </div>
-            <div className="mt-6 text-center text-sm text-gray-500">
-              © {new Date().getFullYear()} Calorie Tracker. All rights reserved.
-            </div>
+              
+              <CalorieCalendar onDateSelect={handleDateSelect} selectedDate={selectedDate} />
+              
+              {historicalDate && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-6 bg-indigo-50 p-4 rounded-xl"
+                >
+                  <h3 className="text-lg font-semibold text-indigo-800 mb-3">
+                    {formatDate(historicalDate)}
+                  </h3>
+                  <div className="flex justify-between items-center mb-4 text-sm">
+                    <span className="text-indigo-600">{historicalCalorieIntake} cal</span>
+                    <span className="text-indigo-600">Goal: {calorieGoal} cal</span>
+                  </div>
+                  <div className="w-full bg-indigo-200 rounded-full h-2 mb-4">
+                    <div 
+                      className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min((historicalCalorieIntake / calorieGoal) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                  {historicalFoodItems.length > 0 ? (
+                    <ul className="divide-y divide-indigo-100">
+                      {historicalFoodItems.map((item) => (
+                        <li key={item._id} className="py-3 flex justify-between items-center">
+                          <div className="flex flex-col">
+                            <span className="font-medium text-gray-900">{item.name}</span>
+                            <span className="text-sm text-gray-500">
+                              {item.quantity} {item.quantity === 1 ? 'serving' : 'servings'}
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-indigo-600 font-medium mr-2">{item.calories} cal</span>
+                            <Clock size={14} className="text-gray-400" />
+                            <span className="text-sm text-gray-500 ml-1">{formatTime(item.timestamp)}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">No food items recorded</p>
+                  )}
+                </motion.div>
+              )}
+            </motion.div>
           </div>
         </div>
-      </motion.footer>
+      </div>
 
       <AnimatePresence>
         {notification && (
@@ -600,7 +547,7 @@ const Dashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-4 right-4 bg-green-100 text-green-800 px-6 py-3 rounded-lg shadow-lg"
+            className="fixed bottom-4 right-4 max-w-md bg-green-100 text-green-800 px-6 py-3 rounded-xl shadow-lg"
           >
             {notification}
           </motion.div>
