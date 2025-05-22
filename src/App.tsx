@@ -26,6 +26,7 @@ function App() {
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/dashboard" element={<Dashboard />}
 
           {/* Protected Routes */}
           <Route 
